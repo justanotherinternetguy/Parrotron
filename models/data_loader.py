@@ -14,13 +14,15 @@ from torch.utils.data import Dataset, Sampler, DistributedSampler, DataLoader
 import matplotlib
 import torchaudio
 import wave
+from scipy.signal.windows import hamming
+torch.set_default_device('cuda')
 
-windows = {
-    'hamming': scipy.signal.hamming,
-    'hann': scipy.signal.hann,
-    'blackman': scipy.signal.blackman,
-    'bartlett': scipy.signal.bartlett
-    }
+
+windows = { 'hamming': hamming,
+            'hann': scipy.signal.windows.hann,
+            'blackman': scipy.signal.windows.blackman,
+            'bartlett': scipy.signal.windows.bartlett
+            }
 
 def load_label(label_path):
     char2index = dict() # [ch] = id
@@ -94,7 +96,7 @@ class SpectrogramParser(AudioParser):
                 n_fft=2048, win_length=self.window_size, hop_length=self.hop_length)
 
     def parse_audio(self, audio_path):
-        signal, _ = librosa.load(audio_path, self.sample_rate)
+        signal, _ = librosa.load(audio_path, sr=self.sample_rate)
         
         spec = librosa.feature.melspectrogram(y=signal, 
                                                 sr=self.sample_rate,
@@ -119,7 +121,7 @@ class SpectrogramParser(AudioParser):
             frame_rate = wave_file.getframerate()
             print(frame_rate)
         '''
-        signal, _ = librosa.load(audio_path, self.sample_rate)
+        signal, _ = librosa.load(audio_path, sr=self.sample_rate)
         
         spec = librosa.stft(signal, n_fft=2048, hop_length=200, win_length=800, window='hann')
         

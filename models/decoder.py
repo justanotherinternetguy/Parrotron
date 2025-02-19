@@ -75,7 +75,7 @@ class Decoder(nn.Module):
 
         return decoder_output, self.attention_weights
    
-    def forward(self, encoder_inputs, decoder_inputs, tf):
+    def forward(self, encoder_inputs, decoder_inputs, tf=10):
         """ 
         Decoder forward pass for training
         PARAMS

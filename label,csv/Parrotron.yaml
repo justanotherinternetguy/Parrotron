@@ -1,6 +1,6 @@
 data:
-  train_path: "/home/jhjeong/jiho_deep/two_pass/label,csv/AI_hub_all_U_800_T_50.csv"
-  val_path: "/home/jhjeong/jiho_deep/two_pass/label,csv/AI_hub_val_U_800_T_50.csv"
+  train_path: "/home/alien/Git/Parrotron/label,csv/train.csv"
+  val_path: "/home/alien/Git/Parrotron/label,csv/test.csv"
   seed: 123456
   num_workers: 16
   batch_size: 12

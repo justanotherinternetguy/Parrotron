@@ -24,6 +24,8 @@ from models.model import Parrotron
 from models.eval_distance import eval_wer, eval_cer
 from models.data_loader import SpectrogramDataset, AudioDataLoader, AttrDict
 from models.loss_function import ParrotronLoss
+from scipy.signal.windows import hamming
+
 
 def load_label(label_path):
     char2index = dict() # [ch] = id
@@ -44,7 +46,7 @@ def load_label(label_path):
     return char2index, index2char
 
 # SOS_token, EOS_token, PAD_token 정의
-char2index, index2char = load_label('./label,csv/english_unit.labels')
+char2index, index2char = load_label('/home/alien/Git/Parrotron/label,csv/english_unit.labels')
 SOS_token = char2index['<s>']
 EOS_token = char2index['</s>']
 PAD_token = char2index['_']
@@ -164,7 +166,7 @@ def evaluation(model, val_loader, criterion, device):
     return eval_loss, final_wer
 
 def main():
-    yaml_name = "./label,csv/Parrotron.yaml"
+    yaml_name = "/home/alien/Git/Parrotron/label,csv/Parrotron.yaml"
     
     with open("./parrotron.txt", "w") as f:
         f.write(yaml_name)
@@ -183,10 +185,10 @@ def main():
     cuda = torch.cuda.is_available()
     device = torch.device('cuda' if cuda else 'cpu')
     
-    windows = { 'hamming': scipy.signal.hamming,
-                'hann': scipy.signal.hann,
-                'blackman': scipy.signal.blackman,
-                'bartlett': scipy.signal.bartlett
+    windows = { 'hamming': hamming,
+                'hann': scipy.signal.windows.hann,
+                'blackman': scipy.signal.windows.blackman,
+                'bartlett': scipy.signal.windows.bartlett
                 }
 
     SAMPLE_RATE = config.audio_data.sampling_rate
@@ -249,20 +251,20 @@ def main():
     #-------------------------- Data load --------------------------
     #train dataset
     train_dataset = SpectrogramDataset(audio_conf, 
-                                       "/home/jhjeong/jiho_deep/Parrotron/label,csv/train.csv",
+                                       "/home/alien/Git/Parrotron/label,csv/train.csv",
                                        feature_type=config.audio_data.type, 
                                        normalize=True, 
                                        spec_augment=True)
 
     train_loader = AudioDataLoader(dataset=train_dataset,
-                                    shuffle=True,
+                                    shuffle=False,
                                     num_workers=config.data.num_workers,
                                     batch_size=32,
                                     drop_last=True)
     
     #val dataset
     val_dataset = SpectrogramDataset(audio_conf, 
-                                     "/home/jhjeong/jiho_deep/Parrotron/label,csv/test.csv", 
+                                     "/home/alien/Git/Parrotron/label,csv/test.csv", 
                                      feature_type=config.audio_data.type,
                                      normalize=True,
                                      spec_augment=False)
@@ -311,4 +313,16 @@ def main():
         torch.save(model.module.state_dict(), "./plz_load/parrotron.pth")               
 
 if __name__ == '__main__':
-    main()
+    # cuda = torch.cuda.is_available()
+    # device = torch.device("cuda")
+    # torch.set_default_device('cuda')
+    # print(cuda)
+    # main()
+    import torch.multiprocessing as mp
+    try:
+        mp.set_start_method('spawn', force=True)
+        print("spawned")
+        main()
+        
+    except RuntimeError:
+        pass

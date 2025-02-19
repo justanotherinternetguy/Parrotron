@@ -4,6 +4,7 @@ import torch.nn.functional as F
 from torch import nn, autograd
 import math
 from torch.autograd import Variable
+torch.set_default_device('cuda')
 
 class Parrotron(nn.Module):
     def __init__(self, encoder, spectrogram_decoder, asr_decoder):
@@ -30,7 +31,7 @@ class Parrotron(nn.Module):
 
         mel_outputs_postnet = self.spectrogram_decoder.inference(encoder_outputs, tts_inputs)
         
-        #txt_outputs = self.asr_decoder(encoder_outputs, targets)
+        txt_outputs = self.asr_decoder(encoder_outputs, targets)
 
         return mel_outputs_postnet, txt_outputs
 
