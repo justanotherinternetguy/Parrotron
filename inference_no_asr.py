@@ -23,7 +23,7 @@ import matplotlib
 from models.encoder import Encoder
 from models.decoder import Decoder
 from models.asr_decoder import ASR_Decoder
-from models.model import Parrotron
+from models.model import Parrotron, Parrotron_No_ASR
 from models.eval_distance import eval_wer, eval_cer
 from models.data_loader import SpectrogramDataset, AudioDataLoader, AttrDict
 
@@ -95,11 +95,9 @@ def inference(model, val_loader, device):
     total_spec_loss = 0
     total_num = 0
 
-    total_cer = 0
     total_wer = 0
-    
+
     total_wer_len = 0
-    total_cer_len = 0
 
     start_time = time.time()
     total_batch_num = len(val_loader)
@@ -109,26 +107,28 @@ def inference(model, val_loader, device):
                 print(i)
                 
             seqs, targets, tts_seqs, seq_lengths, target_lengths, tts_seq_lengths = data
+            print(data)
             
             seqs = seqs.to(device) # (batch_size, time, freq)
             targets = targets.to(device)
             tts_seqs = tts_seqs.to(device)
             
-            mel_outputs_postnet, _ = model.inference(seqs, tts_seqs, targets)
-            #mel_outputs_postnet, _ = model(seqs, tts_seqs, targets)
+            #mel_outputs_postnet = model.inference(seqs, tts_seqs)
+            mel_outputs_postnet, _, _ = model(seqs, tts_seqs, None)
+            # spec = mel_outputs_postnet.squeeze().transpose(0,1).numpy()
+            spec = mel_outputs_postnet.to("cuda").squeeze().transpose(0,1).cpu().numpy()
 
-            spec = mel_outputs_postnet.squeeze().transpose(0,1).cpu().numpy()
             
             path = './test_wav'
             os.makedirs(path, exist_ok=True)
-            y_inv = librosa.griffinlim(spec, hop_length=200, win_length=800, window='hann')
+            y_inv = librosa.griffinlim(spec, hop_length=200, win_length=500, window='hann')
             sf.write('./test_wav/'+ str(i) +'.wav', y_inv, 16000)
             #print(y_inv.shape)
 
             path1 = './test_img'
             os.makedirs(path1, exist_ok=True)
             matplotlib.image.imsave('./test_img/'+ str(i) +'.png', spec)
-            
+           
     return 
 
 def main():
@@ -143,13 +143,12 @@ def main():
 
     device = torch.device('cuda')
     
-    
     windows = { 'hamming': scipy.signal.windows.hamming,
                 'hann': scipy.signal.windows.hann,
                 'blackman': scipy.signal.windows.blackman,
                 'bartlett': scipy.signal.windows.bartlett
                 }
-    
+
     SAMPLE_RATE = config.audio_data.sampling_rate
     WINDOW_SIZE = config.audio_data.window_size
     WINDOW_STRIDE = config.audio_data.window_stride
@@ -180,21 +179,8 @@ def main():
                   postnet_filter=5,
                   dropout=0.5)
     
-    asr_dec = ASR_Decoder(label_dim=31,
-                         embedding_dim=64,
-                         encoder_dim=256*2,
-                         rnn_hidden_size=512,
-                         second_rnn_hidden_size=256,
-                         attention_dim=128,
-                         attention_filter_n=32,
-                         attention_filter_len=31,
-                         sos_id=SOS_token,
-                         eos_id=EOS_token,
-                         pad_id=PAD_token)
-    
-    model = Parrotron(enc, dec, asr_dec).to(device)
-
-    model.load_state_dict(torch.load("/home/alien/Git/Parrotron/plz_load/parrotron.pth"))
+    model = Parrotron_No_ASR(enc, dec).to(device)
+    model.load_state_dict(torch.load("/home/alien/Git/Parrotron/plz_load/best_parrotron_no_asr.pth"))
     
     #inference dataset
     val_dataset = SpectrogramDataset(audio_conf, 

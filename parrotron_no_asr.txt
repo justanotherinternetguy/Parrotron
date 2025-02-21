@@ -1,0 +1,63 @@
+/home/alien/Git/Parrotron/label,csv/Parrotron.yaml
+
+학습 시작
+lr = 0.0001
+Epoch 1 (Train) Loss 0.9275 time 1977.9924
+Epoch 1 (Eval) Loss 0.8894 time 174.2868
+lr = 0.0001
+Epoch 2 (Train) Loss 0.8730 time 1963.5347
+Epoch 2 (Eval) Loss 0.8658 time 174.8297
+lr = 0.0001
+Epoch 3 (Train) Loss 0.8555 time 1963.8250
+Epoch 3 (Eval) Loss 0.8599 time 174.8203
+lr = 0.0001
+Epoch 4 (Train) Loss 0.8561 time 1961.6240
+Epoch 4 (Eval) Loss 0.8604 time 173.8367
+lr = 0.0001
+Epoch 5 (Train) Loss 0.8407 time 1953.0502
+Epoch 5 (Eval) Loss 0.8493 time 173.4865
+lr = 0.0001
+Epoch 6 (Train) Loss 0.8370 time 1946.9244
+Epoch 6 (Eval) Loss 0.8466 time 174.9165
+lr = 0.0001
+Epoch 7 (Train) Loss 0.8343 time 2023.1102
+Epoch 7 (Eval) Loss 0.8438 time 175.4741
+lr = 0.0001
+Epoch 8 (Train) Loss 0.8302 time 2023.3859
+Epoch 8 (Eval) Loss 0.8383 time 175.0265
+lr = 0.0001
+Epoch 9 (Train) Loss 0.8261 time 2027.6532
+Epoch 9 (Eval) Loss 0.8362 time 175.0348
+lr = 0.0001
+Epoch 10 (Train) Loss 0.8240 time 2023.2752
+Epoch 10 (Eval) Loss 0.8353 time 174.8204
+lr = 0.0001
+Epoch 11 (Train) Loss 0.8222 time 2024.0072
+Epoch 11 (Eval) Loss 0.8342 time 175.0520
+lr = 0.0001
+Epoch 12 (Train) Loss 0.8205 time 2025.2410
+Epoch 12 (Eval) Loss 0.8349 time 175.3896
+lr = 0.0001
+Epoch 13 (Train) Loss 0.8189 time 2025.6228
+Epoch 13 (Eval) Loss 0.8329 time 175.1149
+lr = 0.0001
+Epoch 14 (Train) Loss 0.8167 time 2043.3989
+Epoch 14 (Eval) Loss 0.8324 time 176.2495
+lr = 0.0001
+Epoch 15 (Train) Loss 0.8145 time 2038.9692
+Epoch 15 (Eval) Loss 0.8334 time 176.1727
+lr = 0.0001
+Epoch 16 (Train) Loss 0.8117 time 2035.4861
+Epoch 16 (Eval) Loss 0.8343 time 176.2573
+lr = 0.0001
+Epoch 17 (Train) Loss 0.8085 time 2034.8933
+Epoch 17 (Eval) Loss 0.8349 time 175.9688
+lr = 0.0001
+Epoch 18 (Train) Loss 0.8049 time 2036.5258
+Epoch 18 (Eval) Loss 0.8369 time 174.4158
+lr = 0.0001
+Epoch 19 (Train) Loss 0.8003 time 1955.3735
+Epoch 19 (Eval) Loss 0.8391 time 174.2632
+lr = 0.0001
+Epoch 20 (Train) Loss 0.7960 time 1952.9575
+Epoch 20 (Eval) Loss 0.8418 time 174.1024

@@ -89,7 +89,8 @@ class Decoder(nn.Module):
         gate_outputs: gate outputs from the decoder
         alignments: sequence of attention weights from the decoder
         """
-        use_teacher_forcing = True if random.random() < tf else False
+        # use_teacher_forcing = True if random.random() < tf else False
+        use_teacher_forcing=True
         
         #init part
         batch_size, max_len, decoder_dim = decoder_inputs.size()

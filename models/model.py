@@ -43,10 +43,19 @@ class Parrotron_No_ASR(nn.Module):
         self.spectrogram_decoder = spectrogram_decoder
 
 
-    def forward(self, inputs, tts_inputs, targets, tf):
+    # def forward(self, inputs, tts_inputs, targets, tf):
+    #     encoder_outputs = self.encoder(inputs)
+
+    #     mel_outputs_postnet, mel_outputs = self.spectrogram_decoder(encoder_outputs, tts_inputs, tf)
+        
+    #     txt_outputs = None
+
+    #     return mel_outputs_postnet, mel_outputs, txt_outputs
+    
+    def forward(self, inputs, tts_inputs, targets):
         encoder_outputs = self.encoder(inputs)
 
-        mel_outputs_postnet, mel_outputs = self.spectrogram_decoder(encoder_outputs, tts_inputs, tf)
+        mel_outputs_postnet, mel_outputs = self.spectrogram_decoder(encoder_outputs, tts_inputs)
         
         txt_outputs = None
 

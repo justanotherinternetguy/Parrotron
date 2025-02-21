@@ -11,8 +11,10 @@ import numpy as np
 
 # torch 관련
 import torch
+import gc
 import torch.nn as nn
 import torch.utils.data
+from scipy.signal.windows import hamming
 import torch.optim as optim
 import torch.nn.functional as F
 import torchaudio
@@ -44,7 +46,7 @@ def load_label(label_path):
     return char2index, index2char
 
 # SOS_token, EOS_token, PAD_token 정의
-char2index, index2char = load_label('./label,csv/english_unit.labels')
+char2index, index2char = load_label('/home/alien/Git/Parrotron/label,csv/english_unit.labels')
 SOS_token = char2index['<s>']
 EOS_token = char2index['</s>']
 PAD_token = char2index['_']
@@ -88,16 +90,26 @@ def compute_cer(preds, labels):
 
 def train(model, train_loader, optimizer, criterion, device):
     model.train()
-
     total_loss = 0
     total_num = 0
-
+    total_wer = 0
+    total_wer_len = 0
     start_time = time.time()
     total_batch_num = len(train_loader)
+    
     for i, data in enumerate(train_loader):
         optimizer.zero_grad()
         seqs, _, tts_seqs, seq_lengths, target_lengths, tts_seq_lengths = data
         seqs = seqs.to(device) # (batch_size, time, freq)
+        tts_seqs = tts_seqs.to(device)
+
+        # Debug print statements (uncomment for debugging)
+        print(f"Batch {i+1}/{total_batch_num}:")
+        print(f"  seqs shape: {seqs.shape}")
+        print(f"  tts_seqs shape: {tts_seqs.shape}")
+        print(f"  Sequence lengths: {seq_lengths}")
+        
+        seqs = seqs.to(device)
         tts_seqs = tts_seqs.to(device)
 
         mel_outputs_postnet, mel_outputs, txt_outputs = model(seqs, tts_seqs, None, 0)
@@ -108,11 +120,16 @@ def train(model, train_loader, optimizer, criterion, device):
         
         loss.backward()
         optimizer.step()
-      
+        for param_group in optimizer.param_groups:
+            lr = param_group['lr']
+            print(f"Batch {i+1}/{total_batch_num} - Learning Rate: {lr}")
+    
         if i % 100 == 0:
             print('{} train_batch: {:4d}/{:4d}, train_spec_loss: {:.4f}, train_time: {:.2f}'
-                  .format(datetime.datetime.now(), i, total_batch_num, loss.item(),  time.time() - start_time))
+                .format(datetime.datetime.now(), i, total_batch_num, loss.item(),  time.time() - start_time))
             start_time = time.time()
+        gc.collect()
+        torch.cuda.empty_cache()
     
     train_loss = total_loss / total_batch_num
 
@@ -143,7 +160,7 @@ def evaluation(model, val_loader, criterion, device):
     return eval_loss
 
 def main():
-    yaml_name = "./label,csv/Parrotron.yaml"
+    yaml_name = "/home/alien/Git/Parrotron/label,csv/Parrotron.yaml"
     
     with open("./parrotron_no_asr.txt", "w") as f:
         f.write(yaml_name)
@@ -160,12 +177,12 @@ def main():
     torch.cuda.manual_seed_all(config.data.seed)
 
     cuda = torch.cuda.is_available()
-    device = torch.device('cuda' if cuda else 'cpu')
+    device = torch.device('cuda')
     
-    windows = { 'hamming': scipy.signal.hamming,
-                'hann': scipy.signal.hann,
-                'blackman': scipy.signal.blackman,
-                'bartlett': scipy.signal.bartlett
+    windows = { 'hamming': scipy.signal.windows.hamming,
+                'hann': scipy.signal.windows.hann,
+                'blackman': scipy.signal.windows.blackman,
+                'bartlett': scipy.signal.windows.bartlett
                 }
 
     SAMPLE_RATE = config.audio_data.sampling_rate
@@ -213,30 +230,30 @@ def main():
     
     #-------------------------- Data load --------------------------
     #train dataset
-    train_dataset = SpectrogramDataset(audio_conf, 
-                                       "/home/jhjeong/jiho_deep/Parrotron/label,csv/train.csv",
-                                       feature_type=config.audio_data.type, 
-                                       normalize=True, 
-                                       spec_augment=True)
-
-    train_loader = AudioDataLoader(dataset=train_dataset,
-                                    shuffle=True,
-                                    num_workers=config.data.num_workers,
-                                    batch_size=44,
-                                    drop_last=True)
+    train_dataset = SpectrogramDataset(audio_conf,
+                                      "/home/alien/Git/Parrotron/label,csv/train.csv",
+                                      feature_type=config.audio_data.type,
+                                      normalize=True,
+                                      spec_augment=True)
     
-    #val dataset
-    val_dataset = SpectrogramDataset(audio_conf, 
-                                     "/home/jhjeong/jiho_deep/Parrotron/label,csv/test.csv", 
-                                     feature_type=config.audio_data.type,
-                                     normalize=True,
-                                     spec_augment=False)
-
+    # Set num_workers=0 for single GPU training
+    train_loader = AudioDataLoader(dataset=train_dataset,
+                                  shuffle=False,
+                                  num_workers=0,
+                                  batch_size=4,
+                                  drop_last=True)
+    
+    val_dataset = SpectrogramDataset(audio_conf,
+                                    "/home/alien/Git/Parrotron/label,csv/test.csv",
+                                    feature_type=config.audio_data.type,
+                                    normalize=True,
+                                    spec_augment=False)
+    
     val_loader = AudioDataLoader(dataset=val_dataset,
-                                 shuffle=True,
-                                 num_workers=config.data.num_workers,
-                                 batch_size=44,
-                                 drop_last=True)
+                                shuffle=False,
+                                num_workers=0,
+                                batch_size=4,
+                                drop_last=True)
     
     print(" ")
     print("parrotron 를 학습합니다.")
