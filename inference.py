@@ -190,7 +190,7 @@ def main():
                          attention_filter_len=31,
                          sos_id=SOS_token,
                          eos_id=EOS_token,
-                         pad_id=PAD_token)
+                         pad_id=PAD_token)  
     
     model = Parrotron(enc, dec, asr_dec).to(device)
 
