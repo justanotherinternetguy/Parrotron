@@ -1,6 +1,7 @@
 import os
 import time
 import yaml
+import jiwer
 import random
 import shutil
 import argparse
@@ -46,6 +47,34 @@ SOS_token = char2index['<s>']
 EOS_token = char2index['</s>']
 PAD_token = char2index['_']
 
+# def compute_cer(preds, labels):
+#     total_wer = 0
+#     total_cer = 0
+#     total_wer_len = 0
+#     total_cer_len = 0
+#     for label, pred in zip(labels, preds):
+#         units = []
+#         units_pred = []
+#         for a in label:
+#             if a == EOS_token: 
+#                 break
+#             units.append(index2char[a])
+#         for b in pred:
+#             if b == EOS_token: 
+#                 break
+#             units_pred.append(index2char[b])
+#         label = ''.join(units)
+#         pred = ''.join(units_pred)
+#         wer = eval_wer(pred, label)
+#         cer = eval_cer(pred, label)
+#         wer_len = len(label.split())
+#         cer_len = len(label.replace(" ", ""))
+#         total_wer += wer
+#         total_cer += cer
+#         total_wer_len += wer_len
+#         total_cer_len += cer_len
+#     return total_wer, total_cer, total_wer_len, total_cer_len
+
 def compute_cer(preds, labels):
     total_wer = 0
     total_cer = 0
@@ -64,15 +93,20 @@ def compute_cer(preds, labels):
             units_pred.append(index2char[b])
         label = ''.join(units)
         pred = ''.join(units_pred)
-        wer = eval_wer(pred, label)
-        cer = eval_cer(pred, label)
+        
+        # Calculate WER using jiwer
+        wer = jiwer.wer(label, pred)  # Using jiwer to calculate WER
+        cer = eval_cer(pred, label)  # Keep using your existing CER function
+        
         wer_len = len(label.split())
         cer_len = len(label.replace(" ", ""))
         total_wer += wer
         total_cer += cer
         total_wer_len += wer_len
         total_cer_len += cer_len
+    
     return total_wer, total_cer, total_wer_len, total_cer_len
+
 
 def train(model, train_loader, optimizer, criterion, device):
     model.train()
@@ -246,7 +280,7 @@ def main():
     train_loader = AudioDataLoader(dataset=train_dataset,
                                   shuffle=False,
                                   num_workers=0,
-                                  batch_size=4,
+                                  batch_size=3,
                                   drop_last=True)
     
     val_dataset = SpectrogramDataset(audio_conf,
@@ -258,7 +292,7 @@ def main():
     val_loader = AudioDataLoader(dataset=val_dataset,
                                 shuffle=False,
                                 num_workers=0,
-                                batch_size=4,
+                                batch_size=3,
                                 drop_last=True)
 
     print("\nTraining on device:", device)

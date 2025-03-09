@@ -46,7 +46,7 @@ model:
 
 training:
   begin_epoch: 0
-  end_epoch: 20
+  end_epoch: 150
 
 inference:
   beam_search: False
